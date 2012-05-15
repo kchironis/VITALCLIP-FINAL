@@ -893,6 +893,32 @@ function updateOrientation(){
 	}
 	
 }
+
+function removeoptionsPanel(){
+	if ($('#pullPanel').css("margin-left") != "0px"){
+		$('.inner').hide()
+		$('#pullPanel').css("margin-left", "0px");
+		$('.graph').css("left", "16px");
+		$('.graph').css("width", "460px");
+		$('#visualization').css("width", "+=60");
+		
+		var selection = history.getSelection();
+		options.chartArea.width = 460;
+		drawChart();
+		history.setSelection(selection);
+	}else{
+		$('.inner').show()
+		$('#pullPanel').css("margin-left", "45px");
+		$('.graph').css("left", "61px");
+		$('.graph').css("width", "408px");
+		$('#visualization').css("width", "-=45");
+		options.chartArea.width = 408;
+		var selection = history.getSelection();
+		drawChart();
+		history.setSelection(selection);
+	}
+}
+
 </script>
 
 
@@ -1430,10 +1456,33 @@ body{
 
 #logButton{
 	float: right;
-	background: url("img/graph_icon.png") no-repeat;
-	width: 480px;
+	background: url("img/headerButts/vitalclip_graph_blank_03.png") no-repeat;
+	height: 31px;
+	width: 43px;
+	margin-right: 26px;
+	margin-top: 7px;
+	border: none;
+	
+}
+
+#backButton{
+	background: url("img/headerButts/vitalclip_graph_blank_06.png") no-repeat;
+	height: 31px;
+	width: 52px;
+	float: left;
+	margin-left: 6px;
+	margin-top: 8px;
 	border: none;
 }
+
+#back:active #backButton{
+	background-image: url("img/headerButts/vitalclip_graph_blank-pushed_06.png");
+}
+
+#logButton button:active{
+	background-image: url("img/headerButts/vitalclip_graph_blank-pushed_03.png");
+}
+
 
 #pullPanel{
 	background: url('img/graph_menu_06.png') no-repeat;
@@ -1452,7 +1501,7 @@ body{
 <div class="page_wrapper">
 
 <div class="wrapper">
-
+	
 <a href="wireframe7.html"><button class="back"></button>
 </a>
 
@@ -1474,7 +1523,7 @@ body{
 			  <input type="radio" name="range" id="DayRad" value="Day" onClick="changeRange(this.value)">
 		</input>
 	</div>
-	<!-- <button type="button" id="logButton"></button> -->
+	<button type="button" id="logButton"></button>
 </div>
 <!-- <div><img src="vitalclip_menu_offstatewbg.png" class="mainimg"></div> -->
 
@@ -1511,7 +1560,7 @@ body{
     <br><br>
 <br>
    </div>
-<button id="pullPanel"></button>
+<button id="pullPanel" onClick="removeoptionsPanel()"></button>
 
 </div>
 <div class="graph">
