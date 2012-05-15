@@ -1,0 +1,272 @@
+<html>
+<head>
+
+<script type="text/javascript">
+
+var changeone = false;
+var changetwo = false
+var changethree = false;
+var changefour = false;
+
+window.onload = function initialLoad() {
+    updateOrientation();
+}
+
+window.setInterval(updateOrientation, 500);
+
+function updateOrientation(){
+    var contentType = "show_";
+    switch(window.orientation){
+        case 0:
+	contentType += "normal";
+	break;
+
+	case -90:
+	window.location="http://www.katiechironis.com/vitalclip/wireframe5.html"
+	break;
+
+	case 90:
+	window.location="http://www.katiechironis.com/vitalclip/wireframe5.html"
+	break;
+
+	case 180:
+	contentType += "flipped";
+	break;
+    }
+    document.getElementById("page_wrapper").setAttribute("class", contentType);
+}
+
+function transitionPage()
+{
+window.location="http://www.katiechironis.com/vitalclip/wireframe5.html"
+
+}
+
+function change1()
+{
+	changeone = !changeone;
+	
+	if (changeone == true)
+	{
+	document.getElementById("factor1").style.backgroundImage = "url(factor1_pressed.png)";
+	}
+	else
+	{
+	document.getElementById("factor1").style.backgroundImage = "url(factor1.png)";
+	}
+}
+
+function change2()
+{
+
+		changetwo = !changetwo;
+	
+	if (changetwo == true)
+	{
+	document.getElementById("factor2").style.backgroundImage = "url(factor2_down.png)";
+	}
+	else
+	{
+	document.getElementById("factor2").style.backgroundImage = "url(factor2.png)";
+	}
+}
+
+function change3()
+{
+
+			changethree = !changethree;
+	
+	if (changethree == true)
+	{
+	document.getElementById("factor3").style.backgroundImage = "url(factor3_down.png)";
+	}
+	else
+	{
+	document.getElementById("factor3").style.backgroundImage = "url(factor3.png)";
+	}
+}
+
+function change4()
+{
+
+			changefour = !changefour;
+	
+	if (changefour == true)
+	{
+	document.getElementById("factor4").style.backgroundImage = "url(factor4_down.png)";
+	}
+	else
+	{
+	document.getElementById("factor4").style.backgroundImage = "url(factor4.png)";
+	}
+}
+
+
+</script>
+
+
+<style type="text/css">
+
+img
+{
+width:320px;
+}
+
+
+#one
+{
+	width:71px;
+	height:69px;
+	position:absolute;
+	z-index:100;
+	top:418px;
+	left:125px;
+	opacity:0;
+}
+
+
+#two
+{
+	width:69px;
+	height:41px;
+	position:absolute;
+	z-index:100;
+	top:1px;
+	left:246px;
+	opacity:0;
+}
+
+
+#three
+{
+	width:72px;
+	height:45px;
+	position:absolute;
+	z-index:100;
+	top:434px;
+	left:-4px;
+	opacity:0;
+}
+
+#four
+{
+position:absolute;
+top:740px;
+left:379px;
+width:420px;
+height:90px;
+font-size:40px;
+border:0px solid;
+}
+
+#five
+{
+position:absolute;
+top:890px;
+left:149px;
+width:220px;
+height:90px;
+font-size:50px;
+border:0px solid;
+}
+
+#six
+{
+position:absolute;
+top:890px;
+left:519px;
+width:180px;
+height:90px;
+font-size:50px;
+border:0px solid;
+}
+
+#page_wrapper
+{
+width:320px;
+position:relative;
+margin-left:auto;
+margin-right:auto;
+}
+
+.right
+{
+background-color:#000;
+}
+
+.left
+{
+background-color:#000;
+}
+
+.normal
+{
+background-color:#fff;
+}
+
+.newfooter
+{
+position:absolute;
+top:428px;
+}
+
+#factor1
+{
+	position:absolute;
+	width:262px;
+	height:28px;
+	left: 34px;
+	top: 139px;
+	background-image:url('factor1.png');
+}
+
+#factor2
+{
+	position:absolute;
+	width:261px;
+	height:28px;
+	left: 34px;
+	top: 172px;
+	background-image:url('factor2.png');
+}
+
+#factor3
+{
+	position:absolute;
+	width:261px;
+	height:28px;
+	left: 34px;
+	top: 205px;
+	background-image:url('factor3.png');
+}
+
+#factor4
+{
+	position:absolute;
+	width:262px;
+	height:26px;
+	left: 34px;
+	top: 237px;
+	background-image:url('factor4.png');
+}
+
+
+</style>
+
+</head>
+<div id="page_wrapper">
+
+<img src="reading_step_02.png" ><a href="wireframe7.html">
+  <button type="button" id="three">Click Me!</button>
+  </a> 
+  <img src="newfooter.png" class="newfooter"> <a href="wireframe64.html">
+  <button type="button" id="two">Click Me!</button>
+</a> 
+
+<div id="factor1"  onclick="change1()"></div>
+<div id="factor2"  onclick="change2()"></div>
+<div id="factor3"  onclick="change3()"></div>
+<div id="factor4"  onclick="change4()"></div>
+
+</div>
+</html>

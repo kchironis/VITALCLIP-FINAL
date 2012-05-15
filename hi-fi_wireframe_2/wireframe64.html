@@ -3,6 +3,11 @@
 
 <script type="text/javascript">
 
+
+var changeone = false;
+var changetwo = false
+var changethree = false;
+
 window.onload = function initialLoad() {
     updateOrientation();
 }
@@ -35,6 +40,50 @@ function transitionPage()
 {
 window.location="http://www.katiechironis.com/vitalclip/wireframe5.html"
 
+}
+
+function change1()
+{
+	changeone = !changeone;
+	
+	if (changeone == true)
+	{
+	document.getElementById("factor1").style.backgroundImage = "url(factor5_down.png)";
+	}
+	else
+	{
+	document.getElementById("factor1").style.backgroundImage = "url(factor5.png)";
+	}
+}
+
+function change2()
+{
+
+		changetwo = !changetwo;
+	
+	if (changetwo == true)
+	{
+	document.getElementById("factor2").style.backgroundImage = "url(factor6_down.png)";
+	}
+	else
+	{
+	document.getElementById("factor2").style.backgroundImage = "url(factor6.png)";
+	}
+}
+
+function change3()
+{
+
+			changethree = !changethree;
+	
+	if (changethree == true)
+	{
+	document.getElementById("factor3").style.backgroundImage = "url(factor7_down.png)";
+	}
+	else
+	{
+	document.getElementById("factor3").style.backgroundImage = "url(factor7.png)";
+	}
 }
 
 
@@ -146,20 +195,48 @@ position:absolute;
 top:428px;
 }
 
+#factor1
+{
+	position:absolute;
+	width:262px;
+	height:28px;
+	left: 33px;
+	top: 107px;
+	background-image:url('factor5.png');
+}
+
+#factor2
+{
+	position:absolute;
+	width:261px;
+	height:28px;
+	left: 33px;
+	top: 139px;
+	background-image:url('factor6.png');
+}
+
+#factor3
+{
+	position:absolute;
+	width:261px;
+	height:28px;
+	left: 33px;
+	top: 171px;
+	background-image:url('factor7.png');
+}
+
 
 </style>
 
 </head>
-
-<div id="page_wrapper" style="-webkit-transition: -webkit-transform 1s ease-in"
-  onclick="this.style.webkitTransform='rotate(-90deg)'; setInterval(transitionPage, 1000)"><img src="vitalclip_reading_step1.png" ><a href="wireframe7.html">
-<button type="button" id="three">Click Me!</button>
-</a>
-
-<img src="newfooter.png" class="newfooter">
-
-<a href="wireframe7.html">
-<button type="button" id="two">Click Me!</button>
-</a>
+<div id="page_wrapper"><img src="reading_step_03.png" ><a href="wireframe7.html">
+  <button type="button" id="three">Click Me!</button>
+  </a> 
+  <img src="newfooter.png" class="newfooter"> <a href="wireframe65.html">
+  <button type="button" id="two">Click Me!</button></a>
+  
+  <div id="factor1"  onclick="change1()"></div>
+<div id="factor2"  onclick="change2()"></div>
+<div id="factor3"  onclick="change3()"></div>
 </div>
 </html>
