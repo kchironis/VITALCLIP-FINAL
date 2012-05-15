@@ -212,7 +212,7 @@ function updateOrientation(){
 		var range = data.getColumnRange(2);
 	  //options for default state of histogram
 		 options = { strictFirstColumnType: true, animation: {duration: 1000, easing: 'in'}, 
-					chartArea : {width: 400, height: 207, top: 5, left: 10}, focusTarget : "category", 
+					chartArea : {width: 400, height: MAXHEIGHT, top: 5, left: 10}, focusTarget : "category", 
 					hAxis: { format:'MM/dd/yy', viewWindowMode: 'explicit', gridlines: {color: "#dbdad5", count: 24}, 
 					viewWindow: {min: dataView.getValue(0, 0), max: dataView.getValue(data.getNumberOfRows() - 1, 0)}}, //initial date range = all
 					displayAnnotations: true, tooltip: {trigger: 'none'}, curve: "function",
@@ -1050,6 +1050,7 @@ width:100%;
 	z-index:10;
 	left:73px;
 	width:406px;
+	overflow: hidden;
 	top:44px;
 	background-color: white;
 }
@@ -1098,7 +1099,7 @@ width:100%;
 {
 margin-top: 17px;
 width: 406px;
-height: 240px; 
+height: 237px; 
 background-color:#dadada; 
 font-size:20px;
 }
