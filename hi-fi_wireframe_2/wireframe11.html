@@ -913,7 +913,9 @@ function removeoptionsPanel(){
 		$('.graph').css("left", "16px");
 		$('.graph').css("width", "460px");
 		$('#visualization').css("width", "+=60");
-		$('#extraText ul li').css("min-width","132")		
+		$('#extraText ul li').css("min-width","132");	
+		$('#extraText #dayList').css("margin-left","20");		
+			
 		
 		var selection = history.getSelection();
 		options.chartArea.width = 460;
@@ -925,7 +927,9 @@ function removeoptionsPanel(){
 		$('.graph').css("left", "61px");
 		$('.graph').css("width", "408px");
 		$('#visualization').css("width", "-=45");
-		$('#extraText ul li').css("min-width","120")		
+		$('#extraText ul li').css("min-width","120")
+		$('#extraText #dayList').css("margin-left","0");		
+				
 		
 		options.chartArea.width = 408;
 		var selection = history.getSelection();
