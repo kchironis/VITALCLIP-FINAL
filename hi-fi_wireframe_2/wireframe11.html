@@ -382,6 +382,9 @@ function updateOrientation(){
 
 	  function removeDayView(){
 		options.chartArea.height = MAXHEIGHT;
+		$('#extraText').css("height", "83px");
+		$('#extraText').css("margin-top", "0px");
+		$('#extraText').hide();
 
 		$('#tempToggle').prop("disabled",false);
 		$('#sleepToggle').prop("disabled",false);
@@ -417,6 +420,8 @@ function updateOrientation(){
 
 		options.vAxis.baseline = null;	
 		options.vAxis.baselineColor = "black";
+		$('#extraText').css("height", "59px");
+		$('#extraText').css("margin-top", "25px");
 		$('#extraText').show();
 
 
@@ -434,21 +439,30 @@ function updateOrientation(){
 		$('#lowStress').prop("checked",false);
 
 		databyHourView.hideColumns([10,11,12,14,15,16,18,19,20]);
-		day = data.getFilteredRows([{column: 0, minValue: options.hAxis.viewWindow.min, maxValue: options.hAxis.viewWindow.max}]);
-
-		var text = "<ul>";
-		text += "<li><span>Average Sleep: " + data.getValue(day[0], colDir["Sleep"]) + " hours</span></li>";
-		text += "<li><span>Average Weather: " + data.getValue(day[0], colDir["Temperature"]) + unitDir["Temperature"] + " " +
-			data.getValue(day[0], data.getNumberOfColumns() - 1) + "</span></li>";
-		text += "<li><span>Average Activity: " + data.getValue(day[0], colDir["Activity"]) + unitDir["Activity"] +"</span></li>";
-		text += "</ul>";
-
-		extraText.innerHTML = "";
-		extraText.innerHTML = text;
+		addDailyText();
+		
 		options.hAxis.format = "ha";
 		currData = dataByHour;
 		currView = databyHourView;					
 	  }
+	
+	  function addDailyText(){
+			day = data.getFilteredRows([{column: 0, minValue: options.hAxis.viewWindow.min, maxValue: options.hAxis.viewWindow.max}]);
+
+			var text = "<ul id='dayList'>";
+			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir["Sleep"] + "'/> " +
+			 		"<span>" +  data.getValue(day[0], colDir["Sleep"]) + unitDir["Sleep"] + "</span></div><br/>";
+			text += "<span class='iconTitle'>" + abvDir["Sleep"] + "</span></li>";
+			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir["Temperature"] + "'/> " +
+			 		"<span>" +  data.getValue(day[0], colDir["Temperature"]) + unitDir["Temperature"] + "</span></div><br/>";
+			text += "<span class='iconTitle'>" + abvDir["Temperature"] + "</span></li>";
+			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir["Activity"] + "'/> " +
+			 		"<span>" +  data.getValue(day[0], colDir["Activity"]) + unitDir["Activity"] + "</span></div><br/>";
+			text += "<span class='iconTitle'>" + abvDir["Activity"] + "</span></li>";
+
+			extraText.innerHTML = "";
+			extraText.innerHTML = text;
+		}
 
 
 	 /***** changeDate *****
@@ -491,6 +505,10 @@ function updateOrientation(){
 			options.chartArea.height = MAXHEIGHT;
 			drawChart();
 			filterByStress($('#lowStress').get(0));
+		}
+		
+		if (currentRange == "Day"){
+			addDailyText();
 		}
 	  }
 
@@ -1372,6 +1390,17 @@ body{
 	width: 100%;
 }
 
+#extraText #dayList{
+	padding-left: 15px;
+	padding-right: 0px;
+}
+#extraText #dayList li{
+	margin-top:6px;	
+	min-width: 122px;
+}
+#extraText #dayList li:last-child {
+	border-right: 0px;	
+}
 </style>
 
 </head>
