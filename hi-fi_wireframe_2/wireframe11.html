@@ -331,6 +331,8 @@ function updateOrientation(){
 
 		switch(range){
 		  case currentRange:
+			min = options.hAxis.viewWindow.min;
+		    max = options.hAxis.viewWindow.max; 
 			break;
 		  case "All":
 			min = MIN;
@@ -1065,15 +1067,6 @@ width:100%;
 		display: inline; 
 	  }
 
-		#testOverlay{
-			-moz-border-radius: 5px;
-			border-radius: 5px;
-			position: absolute;
-			background-color: rgba(109,109,109,0.9);
-			padding: 5px;
-			color: white;
-			font-size: 12px;
-		}
 
 #visualization
 {
