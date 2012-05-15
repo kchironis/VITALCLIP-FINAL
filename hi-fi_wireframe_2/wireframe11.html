@@ -534,7 +534,7 @@ function updateOrientation(){
 			drawChart();
 
 			if ($('#highStress').prop("checked")){
-				options.chartArea.height = MAXHEIGHT;
+				options.chartArea.height = MAXHEIGHT;	
 				drawChart();
 				filterByStress($('#highStress').get(0));
 			}else if ($('#lowStress').prop("checked")){
@@ -646,7 +646,6 @@ function updateOrientation(){
 				options.vAxis.baseline = stressAveScaled;	
 				options.vAxis.baselineColor = "green";
 				drawChart();
-
 			}
 
 
@@ -680,13 +679,15 @@ function updateOrientation(){
 								lowAverages[fact] + unitDir[fact] + "</span></div><br/>";
 							text += "<span class='otherRan'>vs high: " + highAverages[fact] + "</span><br/>";
 							text += "<span class='iconTitle'>" + abvDir[fact] + " AVE</span></li>";
-
 						}
 						counter++;
 						extraText.innerHTML = text;
 					}
 				}
 					text += "</ul>";
+			}else{
+				$('#extraText').hide();
+
 			}
 			}else{
 				if (options.chartArea.height != MAXHEIGHT){
@@ -1060,11 +1061,10 @@ width:100%;
 .graph
 {
 	position:absolute;
-	z-index:10;
-	left:73px;
+	left:61px;
 	width:406px;
 	overflow: hidden;
-	top:44px;
+	top:45px;
 	background-color: white;
 }
 
@@ -1120,22 +1120,22 @@ font-size:20px;
 .outer
 {
 	overflow:hidden;
-	width:51px;
-	top:-11px;
+	width:61px;
+	top:-10px;
 	height:310px;
 	position:absolute;
-	z-index:10;
-	left: 3px;
+	z-index:0;
+	left: 0px;
 }
 
 .inner
 {
 overflow:scroll; 
 width:68px; 
-top:55px; 
 height:325px;
+top:55px; 
 position:absolute;
-z-index:10;
+z-index:-1;
 }
 
 
@@ -1296,6 +1296,11 @@ width:95%;
 	opacity:0;
 }
 
+#AllRad:active
+{
+	
+}
+
 #MonthRad
 {
 	z-index:40;
@@ -1341,12 +1346,13 @@ width:500px;
 .sidebar
 {
 width:45px;
+
 }
 
 #extraText{
 	background: url("img/vitalclip_day_static.png") repeat-y;
 	position: absolute;
-	top: 181	px;
+	top: 181px;
 	height: 81px;
 	border-bottom: 1px solid rgb(189,189,189);
 	border-top: 1px solid rgb(189,189,189);
@@ -1415,6 +1421,30 @@ body{
 #extraText #dayList li:last-child {
 	border-right: 0px;	
 }
+
+#graphHeader{
+	background: url('img/graph_header.png') no-repeat;
+	height: 45px;
+	
+}
+
+#logButton{
+	float: right;
+	background: url("img/graph_icon.png") no-repeat;
+	width: 480px;
+	border: none;
+}
+
+#pullPanel{
+	background: url('img/graph_menu_06.png') no-repeat;
+	border: none;
+	height: 100%;
+	width: 17px;
+	margin-left: 45px;
+	z-index: 2;
+	margin-top: 55px;
+}
+
 </style>
 
 </head>
@@ -1431,8 +1461,22 @@ body{
 </a>
 
 
-
-<div><img src="vitalclip_menu_offstatewbg.png" class="mainimg"></div>
+<div id="graphHeader">
+	<button type="button" id="backButton"></button>
+	<div id="datechanger">
+		<img src="img/timetoggle/timetoggle.png" class="datechangerimg"></img>
+		<input type="radio" name="range" id="AllRad" value="All" checked="checked" onClick="changeRange(this.value)">
+		</input>
+			  <input type="radio" name="range" id="MonthRad" value="Month" onClick="changeRange(this.value)">
+		</input>
+			  <input type="radio" name="range" id="WeekRad" value="Week" onClick="changeRange(this.value)">
+		</input>
+			  <input type="radio" name="range" id="DayRad" value="Day" onClick="changeRange(this.value)">
+		</input>
+	</div>
+	<!-- <button type="button" id="logButton"></button> -->
+</div>
+<!-- <div><img src="vitalclip_menu_offstatewbg.png" class="mainimg"></div> -->
 
 
 <div class="outer">
@@ -1467,22 +1511,9 @@ body{
     <br><br>
 <br>
    </div>
+<button id="pullPanel"></button>
+
 </div>
-
-
-<div id="datechanger">
-<img src="img/timetoggle/timetoggle.png" class="datechangerimg"></img>
-<input type="radio" name="range" id="AllRad" value="All" checked="checked" onClick="changeRange(this.value)">
-</input>
-	  <input type="radio" name="range" id="MonthRad" value="Month" onClick="changeRange(this.value)">
-</input>
-	  <input type="radio" name="range" id="WeekRad" value="Week" onClick="changeRange(this.value)">
-</input>
-	  <input type="radio" name="range" id="DayRad" value="Day" onClick="changeRange(this.value)">
-    </input>
-</div>
-
-
 <div class="graph">
 	<button type="button" id="prevDate" onClick="changeDate(-1)" ></button>
 	<span id="currentRange"></span>
