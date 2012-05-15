@@ -79,7 +79,7 @@ function updateOrientation(){
 
 	  /***hard coded column values and units***/
 	  var colDir = {"Stress" : 1, "Heart Rate" : 5, "Sleep" : 9, "Temperature" : 13, "Activity" : 17, "Mood" : 21};
-	  var unitDir = {"Stress" : "", "Heart Rate" : " BPM", "Sleep" : "h", "Temperature" : "\u00B0" + "F", "Activity" : "", "Mood" : ""};
+	  var unitDir = {"Stress" : "", "Heart Rate" : " bpm", "Sleep" : "h", "Temperature" : "\u00B0" + "F", "Activity" : "%", "Mood" : ""};
 	  var colorDir = {"Stress" : "grey", "Heart Rate" : "#e15b4f", "Sleep" : "#5091b9",
 	 	"Temperature" : "#cfcb4e", "Activity" : "#86bf58", "Mood" : "#6058ab"};
 	  var abvDir = {"Stress" : "Stress", "Heart Rate" : "  HR", "Sleep" : "Sleep", "Temperature" : "Temp", "Activity" : "Act", "Mood" : "Mood"};
@@ -454,18 +454,20 @@ function updateOrientation(){
 	
 	  function addDailyText(){
 			day = data.getFilteredRows([{column: 0, minValue: options.hAxis.viewWindow.min, maxValue: options.hAxis.viewWindow.max}]);
-
+						
 			var text = "<ul id='dayList'>";
-			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir["Sleep"] + "'/> " +
-			 		"<span>" +  data.getValue(day[0], colDir["Sleep"]) + unitDir["Sleep"] + "</span></div><br/>";
-			text += "<span class='iconTitle'>" + abvDir["Sleep"] + "</span></li>";
-			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir["Temperature"] + "'/> " +
-			 		"<span>" +  data.getValue(day[0], colDir["Temperature"]) + unitDir["Temperature"] + "</span></div><br/>";
-			text += "<span class='iconTitle'>" + abvDir["Temperature"] + "</span></li>";
-			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir["Activity"] + "'/> " +
-			 		"<span>" +  data.getValue(day[0], colDir["Activity"]) + unitDir["Activity"] + "</span></div><br/>";
-			text += "<span class='iconTitle'>" + abvDir["Activity"] + "</span></li>";
-
+			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir["Sleep"] + "'/> " +   "<span class='iconTitle'>" +
+				abvDir["Sleep"] + ":</span></div>"
+			text += "<span class='facVal'>" +  data.getValue(day[0], colDir["Sleep"]) + unitDir["Sleep"] + "</span><br/>";
+			
+			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir["Temperature"] + "'/> " +   "<span class='iconTitle'>" +
+				abvDir["Temperature"] + ":</span></div>"
+			text += "<span class='facVal'>" +  data.getValue(day[0], colDir["Temperature"]) + unitDir["Temperature"] + "</span><br/>";
+			
+			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir["Activity"] + "'/> " +   "<span class='iconTitle'>" +
+				abvDir["Activity"] + ":</span></div>"
+			text += "<span class='facVal'>" + Math.round(1000/data.getValue(day[0], colDir["Activity"]))/10 + "% active</span><br/>";
+			
 			extraText.innerHTML = "";
 			extraText.innerHTML = text;
 		}
@@ -670,15 +672,23 @@ function updateOrientation(){
 				for (var fact in highAverages){
 					if (counter < 3){
 						if (ele.id == "highStress"){
-				  			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir[fact] + "'/> " + "<span>" +
-				 				highAverages[fact] + unitDir[fact] + "</span></div><br/>";
-							text += "<span class='otherRan'>vs low: " + lowAverages[fact] + "</span><br/>";
-							text += "<span class='iconTitle'>" + abvDir[fact] + " AVE</span></li>";
+			  				text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir[fact] + "'/> " +  "<span class='iconTitle'>" +
+							abvDir[fact] + " Avg:</span></div>"
+							if (fact == "Activity")
+								text += "<span class='facVal'>" + Math.round(highAverages[fact]*10/5)*10 + "% active</span><br/>";
+							else
+								text += "<span class='facVal'>" + highAverages[fact] + unitDir[fact] + "</span><br/>";
+							text += "<span class='otherRan'>when low stress: " + lowAverages[fact] + "</span></li>";
+							
 						}else{
-							text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir[fact] + "'/> " + "<span>" + 
-								lowAverages[fact] + unitDir[fact] + "</span></div><br/>";
-							text += "<span class='otherRan'>vs high: " + highAverages[fact] + "</span><br/>";
-							text += "<span class='iconTitle'>" + abvDir[fact] + " AVE</span></li>";
+							text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir[fact] + "'/> " +  "<span class='iconTitle'>" +
+							abvDir[fact] + " Avg:</span></div>"
+							if (fact == "Activity")
+								text += "<span class='facVal'>" + Math.round(lowAverages[fact]*10/5)*10 + "% active</span><br/>";
+							else
+								text += "<span class='facVal'>" + lowAverages[fact] + unitDir[fact] + "</span><br/>";
+							text += "<span class='otherRan'>when high stress: " + highAverages[fact] + "</span></li>";
+							
 						}
 						counter++;
 						extraText.innerHTML = text;
@@ -769,6 +779,8 @@ function updateOrientation(){
 						if (label == "Temperature"){
 							var weath = data.getValue(ele[0].row, data.getNumberOfColumns() - 1);
 							dayTxt = "<span>" + day 	 + "</span><img id='weathIcon' src='" + weathDir[weath] + "'/>" ;
+						}if (label == "Activity"){
+							value =  Math.round(value*10/5)*10;
 						}
 						htmlText += "<span>&#x2022 " + abvDir[label] + ": " + value + unitDir[label] + "</span><br/>";
 					}else{
@@ -901,6 +913,7 @@ function removeoptionsPanel(){
 		$('.graph').css("left", "16px");
 		$('.graph').css("width", "460px");
 		$('#visualization').css("width", "+=60");
+		$('#extraText ul li').css("min-width","132")		
 		
 		var selection = history.getSelection();
 		options.chartArea.width = 460;
@@ -912,6 +925,8 @@ function removeoptionsPanel(){
 		$('.graph').css("left", "61px");
 		$('.graph').css("width", "408px");
 		$('#visualization').css("width", "-=45");
+		$('#extraText ul li').css("min-width","120")		
+		
 		options.chartArea.width = 408;
 		var selection = history.getSelection();
 		drawChart();
@@ -1407,18 +1422,22 @@ width:45px;
 
 #filterIntro{
 	font-size: 12px;
-	font-weight: bold;
 }
 
 .currRan{
-	font-size: 14px;
+	font-size: 10px;
 }
 
 .currRan span{
-	float: left;
+}
+
+.facVal{
+	font-size: 10px;
+	
 }
  .otherRan{
-	font-size: 10px;s
+	font-size: 10px;
+	float: left;
 }
 
 body{
@@ -1433,7 +1452,6 @@ body{
 
 .iconTitle{
 	font-size: 10px;
-	width: 100%;
 }
 
 #extraText #dayList{
@@ -1475,7 +1493,7 @@ body{
 	border: none;
 }
 
-#back:active #backButton{
+ #backButton{
 	background-image: url("img/headerButts/vitalclip_graph_blank-pushed_06.png");
 }
 
