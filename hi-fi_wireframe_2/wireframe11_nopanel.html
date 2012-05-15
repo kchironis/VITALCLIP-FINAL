@@ -1,0 +1,107 @@
+<html>
+<head>
+
+<script type="text/javascript">
+
+window.onload = function initialLoad() {
+    updateOrientation();
+}
+
+window.setInterval(updateOrientation, 500);
+
+function updateOrientation(){
+    var contentType = "show_";
+    switch(window.orientation){
+        case 0:
+	window.location="http://www.katiechironis.com/vitalclip2/wireframe9.html"
+	break;
+
+	case -90:
+	break;
+
+	case 90:
+	break;
+
+	case 180:
+	window.location="http://www.katiechironis.com/vitalclip2/wireframe9.html"
+	break;
+    }
+    document.getElementById("page_wrapper").setAttribute("class", contentType);
+}
+
+</script>
+
+
+<style type="text/css">
+
+img
+{
+width:480;
+}
+
+#one
+{
+	width:62px;
+	height:273px;
+	position:absolute;
+	top:62px;
+	z-index:4;
+	left:394px;
+	opacity:0;
+}
+
+#page_wrapper
+{
+width:480px;
+position:relative;
+margin-left:auto;
+margin-right:auto;
+}
+
+#two
+{
+	position:absolute;
+	z-index:100;
+	top:16px;
+	left:810px;
+	width:70px;
+	height:44px;
+	opacity:0;
+}
+
+
+#five
+{
+	width:88px;
+	height:45px;
+	position:absolute;
+	top:13px;
+	left:390px;
+	opacity:0;
+	z-index:101;
+}
+
+
+
+
+</style>
+
+</head>
+
+
+<div id="page_wrapper"><img src="vitalclip_notselected.png"></div>
+
+<a href="wireframe11.html">
+<button type="button" id="one">Click Me!</button>
+</a>
+
+<a href="wireframe7.html">
+<button type="button" id="two">Click Me!</button>
+</a>
+
+<a href="wireframe8.html">
+<button type="button" id="five">Click Me!</button>
+</a>
+
+
+</html>

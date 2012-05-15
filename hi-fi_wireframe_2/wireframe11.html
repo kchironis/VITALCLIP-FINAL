@@ -37,12 +37,7 @@ function updateOrientation(){
 	<script type="text/javascript">
 	  google.load('visualization', '1', {packages: ['corechart']});
 	</script>
-	<script>
-
-	</script>
-	<script type="text/javascript">
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
+	
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 	<title>
 	  VitalClip History Visualization
@@ -51,6 +46,7 @@ function updateOrientation(){
 	<script type="text/javascript" src="http://datejs.googlecode.com/svn/trunk/build/date-en-US.js"></script>
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 
+	<link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
 	<script type="text/javascript">
 	  google.load('visualization', '1', {packages: ['corechart']});
 	</script>
@@ -83,10 +79,12 @@ function updateOrientation(){
 
 	  /***hard coded column values and units***/
 	  var colDir = {"Stress" : 1, "Heart Rate" : 5, "Sleep" : 9, "Temperature" : 13, "Activity" : 17, "Mood" : 21};
-	  var unitDir = {"Stress" : "", "Heart Rate" : "bpm", "Sleep" : "h", "Temperature" : "\u00B0" + "F", "Activity" : "", "Mood" : ""};
+	  var unitDir = {"Stress" : "", "Heart Rate" : " BPM", "Sleep" : "h", "Temperature" : "\u00B0" + "F", "Activity" : "", "Mood" : ""};
 	  var colorDir = {"Stress" : "grey", "Heart Rate" : "#e15b4f", "Sleep" : "#5091b9",
 	 	"Temperature" : "#cfcb4e", "Activity" : "#86bf58", "Mood" : "#6058ab"};
 	  var abvDir = {"Stress" : "Stress", "Heart Rate" : "  HR", "Sleep" : "Sleep", "Temperature" : "Temp", "Activity" : "Act", "Mood" : "Mood"};
+	  var imgDir = {"Stress" : "Stress", "Heart Rate" : "img/heart_icon.png", "Sleep" : "img/sleep_icon.png",
+	 				"Temperature" : "img/weather_icon.png", "Activity" : "img/activity_icon.png", "Mood" : "img/mood_icon.png"};
 
 
 
@@ -101,6 +99,8 @@ function updateOrientation(){
 		nextButton = document.getElementById('nextDate');
 		extraText = document.getElementById('extraText');
 		$('#stressToggle').hide();
+		$('#extraText').hide();
+		
 
 		var query = new google.visualization.Query(queryURL);
 
@@ -417,6 +417,7 @@ function updateOrientation(){
 
 		options.vAxis.baseline = null;	
 		options.vAxis.baselineColor = "black";
+		$('#extraText').show();
 
 
 		//disable and check or simply .hide()?
@@ -549,6 +550,7 @@ function updateOrientation(){
 
 	function filterByStress(ele){
 		extraText.innerHTML = "";
+		var strRange = "";
 		console.log("eleeee" + ele.id);
 		$("#testOverlay").hide();		
 		if (ele.checked){
@@ -558,11 +560,13 @@ function updateOrientation(){
 		  		case 'highStress':
 					min = stressAve + 1;
 					max = 10;
+					strRange = "higher";
 					$("#lowStress").prop("checked", false);
 					break;
 		  		case 'lowStress':
 					min = 0;
 					max = stressAve - 1;
+					strRange = "lower";
 					$("#highStress").prop("checked", false);	
 					break;
 		  		default:
@@ -637,24 +641,29 @@ function updateOrientation(){
 			console.log( selected[i].row + "Selected");
 
 			history.setSelection(selected);
-
 	  		if (cols.length > 0){
-				var text = "<ul>";
+				$('#extraText').show();
+				var counter = 0;
+				var text = "<ul><span id='filterIntro'>when your stress is " + strRange + " than average...</span><br/>";
 				for (var fact in highAverages){
-					if (ele.id == "highStress"){
-			  			text += "<li><span class='currRan'>Average " + fact + ":" + highAverages[fact] + unitDir[fact] +
-			 					" when your stress is higher than average</span><br/>";
-						text += "<span class='otherRan'>Average " + fact + ":" + lowAverages[fact] + unitDir[fact] +
-						 		" when your stress is lower than average</span></li>";
-					}else{
-				  		text += "<li><span class='currRan'>Average " + fact + ":" + lowAverages[fact] + unitDir[fact] + 
-								" when your stress is lower than average</span><br/>";
-						text += "<span class='otherRan'>Average " + fact + ":" + highAverages[fact] + unitDir[fact] + 
-								"when your stress is higher than average</span></li>";
+					if (counter < 3){
+						if (ele.id == "highStress"){
+				  			text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir[fact] + "'/> " + "<span>" +
+				 				highAverages[fact] + unitDir[fact] + "</span></div><br/>";
+							text += "<span class='otherRan'>vs low: " + lowAverages[fact] + "</span><br/>";
+							text += "<span class='iconTitle'>" + abvDir[fact] + " AVE</span></li>";
+						}else{
+							text += "<li><div class='currRan'><img class='iconImg' src='" + imgDir[fact] + "'/> " + "<span>" + 
+								lowAverages[fact] + unitDir[fact] + "</span></div><br/>";
+							text += "<span class='otherRan'>vs high: " + highAverages[fact] + "</span><br/>";
+							text += "<span class='iconTitle'>" + abvDir[fact] + " AVE</span></li>";
+
+						}
+						counter++;
+						extraText.innerHTML = text;
 					}
-					extraText.innerHTML = text;
 				}
-				text += "</ul>";
+					text += "</ul>";
 			}
 			}else{
 				if (options.chartArea.height != MAXHEIGHT){
@@ -672,6 +681,7 @@ function updateOrientation(){
 					extraText.innerHTML = "";
 			    	history.setSelection();
 				}
+				$('#extraText').hide();
 			}			
 	  }
 
@@ -863,11 +873,14 @@ function updateOrientation(){
 
 
 <style type="text/css">
-
+body{
+	
+}
 #testOverlay
 	{
 	  font-size: 12px;
 	  position: absolute;
+	  z-index: 2;
 	}
 
 
@@ -1193,8 +1206,7 @@ position:absolute;
 top:7px;
 left:20%;
 text-align: center;
-font-family:arial;
-font-size:13px;
+font-size:12px;
 font-weight:bold;
 text-transform:uppercase;
 color:#393939;
@@ -1205,8 +1217,8 @@ z-index: 1;
 #prevDate{
 	cursor: pointer;
 	position:absolute;
-	top:6px;
-	left:18%;
+	top:7px;
+	left:17%;
 	background: url("img/arrow_back.png") no-repeat;
 	border: none;
 	z-index: 1;
@@ -1215,8 +1227,8 @@ z-index: 1;
 #nextDate{
 	cursor: pointer;
 	position:absolute;
-	top:6px;
-	left:68%;
+	top:7px;
+	left:69%;
 	background: url("img/arrow_next.png") no-repeat;
 	border: none;
 	z-index: 1;
@@ -1230,8 +1242,8 @@ z-index: 1;
 {
 	position:absolute;
 	z-index:99;
-	top:5px;
-	left:130px;
+	top:9px;
+	left:129px;
 	width:254px;
 	height:41px;
 }
@@ -1299,6 +1311,67 @@ width:500px;
 width:45px;
 }
 
+#extraText{
+	background: url("img/vitalclip_day_static.png") repeat-y;
+	position: absolute;
+	top: 170px;
+	height: 83px;
+	border-bottom: 1px solid rgb(189,189,189);
+	border-top: 1px solid rgb(189,189,189);
+	width: 100%;	
+}
+
+#extraText ul{
+	margin-top: 0px;
+	padding: 5px 10px;
+}
+
+#extraText ul li{
+	display: inline-block;
+	list-style-type: none;
+	padding-right: 4px;
+	padding-left: 4px;
+	border-right: 1px solid rgb(189,189,189);
+	height: 50px;
+	margin-top: 10px;
+	min-width:120px;
+}
+
+#extraText ul li:first-child{
+	padding-left: 0px;
+}
+
+#filterIntro{
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.currRan{
+	font-size: 14px;
+}
+
+.currRan span{
+	float: left;
+}
+ .otherRan{
+	font-size: 10px;s
+}
+
+body{
+	font-family: 'Varela', sans-serif;
+	color:#393939;
+}
+
+.iconImg{
+	float: left;
+	margin-right: 5px;
+}
+
+.iconTitle{
+	font-size: 10px;
+	width: 100%;
+}
+
 </style>
 
 </head>
@@ -1330,7 +1403,7 @@ width:45px;
       <div id="weather"></div>
       <div id="hstress"></div>
       <div id="lstress"></div>
-      
+     <form id="formFactor">
 	<input type="checkbox" name="sleepToggle" id="sleepToggle" value="10" onclick='checkFactors(this); changeSleep();'>
 	</input>
 	<input type="checkbox" name="activityToggle" id="activityToggle" value="18" onClick='checkFactors(this); changeActivity();'>
@@ -1341,9 +1414,12 @@ width:45px;
 	</input>
 	<input type="checkbox"	name="tempToggle" id="tempToggle" value="14" onClick='checkFactors(this); changeWeather();'>
 	</input>
+	</form>
+	
 	<input type="checkbox" name="highStress" id="highStress" class= "stressTog "onClick="filterByStress(this)" >
 	</input>
 	<input type="checkbox" name="lowStress" id="lowStress" class= "stressTog" onClick="filterByStress(this)"></input>
+
     <br>
     <br><br>
 <br>
@@ -1352,7 +1428,7 @@ width:45px;
 
 
 <div id="datechanger">
-<img src="graphdatechanger.png" class="datechangerimg"></img>
+<img src="img/timetoggle/timetoggle.png" class="datechangerimg"></img>
 <input type="radio" name="range" id="AllRad" value="All" checked="checked" onClick="changeRange(this.value)">
 </input>
 	  <input type="radio" name="range" id="MonthRad" value="Month" onClick="changeRange(this.value)">
@@ -1378,7 +1454,7 @@ width:45px;
 		<img id="arrowPopUp" src="img/arrow.png"/>	
 		<img id="botPopUp" src="img/popup_box_slice_03.png"/>		
 	</div>
-	<div id="extraText"></div>
+	<div id="extraText" style="display: none"></div>
 </div>
 
 </div>
