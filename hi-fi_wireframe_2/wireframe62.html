@@ -1,0 +1,87 @@
+<html>
+<head>
+
+<script type="text/javascript">
+
+window.onload = function initialLoad() {
+    updateOrientation();
+}
+
+window.setInterval(updateOrientation, 500);
+
+function updateOrientation(){
+    var contentType = "show_";
+    switch(window.orientation){
+        case 0:
+		window.location="http://www.katiechironis.com/vitalclip/wireframe7.html"
+	break;
+
+	case -90:
+	break;
+
+	case 90:
+	break;
+
+	case 180:
+	break;
+    }
+    document.getElementById("page_wrapper").setAttribute("class", contentType);
+}
+
+function transitionPage()
+{
+window.location="http://www.katiechironis.com/vitalclip/wireframe7.html"
+
+}
+
+</script>
+
+
+<style type="text/css">
+
+img
+{
+width:520px;
+}
+
+#one
+{
+	width:180px;
+	height:92px;
+	position:absolute;
+	top:141px;
+	z-index:4;
+	left:302px;
+	opacity:0;
+}
+
+#page_wrapper
+{
+width:480px;
+position:relative;
+margin-left:auto;
+margin-right:auto;
+}
+
+#two
+{
+	width:68px;
+	height:36px;
+	position:absolute;
+	top:2px;
+	left:410px;
+	opacity:0;
+}
+
+
+</style>
+
+</head>
+
+
+<div id="page_wrapper"  style="-webkit-transition: -webkit-transform 1s ease-in"
+  onclick="this.style.webkitTransform='rotate(90deg)'; setInterval(transitionPage, 1000)"><img src="vitalclip_reading_step4_done.png">
+
+</div>
+
+</html>

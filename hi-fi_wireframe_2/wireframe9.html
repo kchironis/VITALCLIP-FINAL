@@ -1,0 +1,156 @@
+<html>
+<head>
+
+<script type="text/javascript">
+
+window.onload = function initialLoad() {
+    updateOrientation();
+}
+
+window.setInterval(updateOrientation, 500);
+
+function updateOrientation(){
+    var contentType = "show_";
+    switch(window.orientation){
+        case 0:
+	contentType += "normal";
+	break;
+
+	case -90:
+	window.location="http://www.katiechironis.com/vitalclip/wireframe10.html"
+	break;
+
+	case 90:
+	window.location="http://www.katiechironis.com/vitalclip/wireframe10.html"
+	break;
+
+	case 180:
+	contentType += "flipped";
+	break;
+    }
+    document.getElementById("page_wrapper").setAttribute("class", contentType);
+}
+
+function transitionPage()
+{
+window.location="http://www.katiechironis.com/vitalclip/wireframe10.html"
+
+}
+
+</script>
+
+
+<style type="text/css">
+
+img
+{
+width:320px;
+}
+
+
+#one
+{
+	width:71px;
+	height:69px;
+	position:absolute;
+	z-index:100;
+	top:418px;
+	left:125px;
+	opacity:0;
+}
+
+
+#two
+{
+	width:69px;
+	height:41px;
+	position:absolute;
+	z-index:100;
+	top:1px;
+	left:246px;
+	opacity:0;
+}
+
+
+#three
+{
+	width:72px;
+	height:45px;
+	position:absolute;
+	z-index:100;
+	top:434px;
+	left:-4px;
+	opacity:0;
+}
+
+#four
+{
+position:absolute;
+top:740px;
+left:379px;
+width:420px;
+height:90px;
+font-size:40px;
+border:0px solid;
+}
+
+#five
+{
+position:absolute;
+top:890px;
+left:149px;
+width:220px;
+height:90px;
+font-size:50px;
+border:0px solid;
+}
+
+#six
+{
+position:absolute;
+top:890px;
+left:519px;
+width:180px;
+height:90px;
+font-size:50px;
+border:0px solid;
+}
+
+#page_wrapper
+{
+width:320px;
+position:relative;
+margin-left:auto;
+margin-right:auto;
+}
+
+.right
+{
+background-color:#000;
+}
+
+.left
+{
+background-color:#000;
+}
+
+.normal
+{
+background-color:#fff;
+}
+
+
+</style>
+
+</head>
+
+<div id="page_wrapper" style="-webkit-transition: -webkit-transform 1s ease-in"
+  onclick="this.style.webkitTransform='rotate(90deg)'; setInterval(transitionPage, 1000)"><img src="vitalclip_reading_noneselected.png"><a href="wireframe7.html">
+<button type="button" id="three">Click Me!</button>
+</a>
+
+<a href="wireframe7.html">
+<button type="button" id="two">Click Me!</button>
+</a>
+</div>
+</html>

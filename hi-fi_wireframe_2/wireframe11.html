@@ -1,0 +1,1375 @@
+<html>
+<head>
+
+<script type="text/javascript">
+
+window.onload = function initialLoad() {
+    updateOrientation();
+}
+
+window.setInterval(updateOrientation, 500);
+
+function updateOrientation(){
+    var contentType = "show_";
+    switch(window.orientation){
+        case 0:
+	window.location="http://www.katiechironis.com/vitalclip/wireframe9.html"
+	break;
+
+	case -90:
+	break;
+
+	case 90:
+	break;
+
+	case 180:
+	window.location="http://www.katiechironis.com/vitalclip/wireframe9.html"
+	break;
+    }
+}
+
+</script>
+
+	<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+	<script type="text/javascript" src="http://datejs.googlecode.com/svn/trunk/build/date-en-US.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+
+	<script type="text/javascript">
+	  google.load('visualization', '1', {packages: ['corechart']});
+	</script>
+	<script>
+
+	</script>
+	<script type="text/javascript">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title>
+	  VitalClip History Visualization
+	</title>
+	<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+	<script type="text/javascript" src="http://datejs.googlecode.com/svn/trunk/build/date-en-US.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+
+	<script type="text/javascript">
+	  google.load('visualization', '1', {packages: ['corechart']});
+	</script>
+	<script>
+
+	</script>
+	<script type="text/javascript">
+	  var queryURL = 'https://docs.google.com/spreadsheet/ccc?key=0At84zpBmO56cdDMwNG9xY2wzNWZMOXd2SjhSS0l1MkE'; //dummy data
+	  var options; //graph options
+	  var history; //line chart
+	  var currentRangeText; //value of top date range (text)
+	  var currentRange = "All";	 //value of current range view
+	  var timeFormat = "MMM dd, yyyy"; 
+	  var data; //data as a dataTable
+	  var dataView; //data as dataView to hide columns without changing underlying datatable
+	  var MAX;
+	  var MIN;
+	  var prevButton;
+	  var nextButton;
+	  var calcCounter;
+	  var dataByHour; 
+	  var dataByHourView;
+	  var extraText;
+	  var currData;
+	  var currView;
+	  var initData;
+	  var stressAve = 0;
+	  var stressAveScaled = 0;
+
+	  /***hard coded column values and units***/
+	  var colDir = {"Stress" : 1, "Heart Rate" : 5, "Sleep" : 9, "Temperature" : 13, "Activity" : 17, "Mood" : 21};
+	  var unitDir = {"Stress" : "", "Heart Rate" : "bpm", "Sleep" : "h", "Temperature" : "\u00B0" + "F", "Activity" : "", "Mood" : ""};
+	  var colorDir = {"Stress" : "grey", "Heart Rate" : "#e15b4f", "Sleep" : "#5091b9",
+	 	"Temperature" : "#cfcb4e", "Activity" : "#86bf58", "Mood" : "#6058ab"};
+	  var abvDir = {"Stress" : "Stress", "Heart Rate" : "  HR", "Sleep" : "Sleep", "Temperature" : "Temp", "Activity" : "Act", "Mood" : "Mood"};
+
+
+
+	  /***** drawVisualization *****
+	   called on chart load.
+	   retrieves data from spreadsheet and 
+	   calls response handler 
+	  *******/
+	  function drawVisualization() {
+		currentRangeText = document.getElementById('currentRange');
+		prevButton = document.getElementById('prevDate');
+		nextButton = document.getElementById('nextDate');
+		extraText = document.getElementById('extraText');
+		$('#stressToggle').hide();
+
+		var query = new google.visualization.Query(queryURL);
+
+		// Apply query language.
+		query.setQuery("Select A, B, C, D, E, F, G, H Order BY A");
+
+		// Send the query with a callback function.
+		query.send(handleQueryResponse);
+	  }
+
+	   /***** handleQueryResponse *****
+	   response: obj resulting from data query
+	   checks for errors on query response
+	   forms dataTable and calls initial drawChart()
+	   *******/
+	   function handleQueryResponse(response) {
+	   if (response.isError()) {
+		alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+		return;
+	  }
+
+
+	  initData = response.getDataTable();  
+	  dataView = new google.visualization.DataView(initData);
+	  dataView.setColumns([0]);
+
+	   calcCounter = 0;
+	   for (i=1; i < initData.getNumberOfColumns() - 1; i++){
+		 dataView.setColumns(dataView.getViewColumns().concat([i,{calc:convertToStressScale, type:'number', label:initData.getColumnLabel(i)}]));
+	   }
+
+	  dataView.setColumns(dataView.getViewColumns().concat([initData.getNumberOfColumns() - 1]))
+
+
+	  data = dataView.toDataTable();
+
+	  dataDaily = new google.visualization.DataTable();
+	  dataDaily.addColumn('date', 'Date');
+
+	  var start; var end; var oneDay;
+	  var averages; var curr; var counter;
+	  var firstReading; var reading; var newCounter;
+	  for (i=0; i < data.getNumberOfRows();){
+		averages = [];
+		start = data.getValue(i, 0).clone();
+		start.set({millisecond: 00, second: 00, minute: 00, hour: 00});
+		end = start.clone().set({millisecond: 59, second: 59, minute: 59, hour: 23});
+		oneDay = data.getFilteredRows([{column: 0, minValue: start, maxValue: end}]);
+
+		averages[0] = start.clone();
+		for (col = 1; col < data.getNumberOfColumns(); col++){
+		  if (i==0){
+			dataDaily.addColumn(data.getColumnType(col), data.getColumnLabel(col));
+		  }			
+
+		  averages[col] = 0;
+		  counter = 0;
+		  for (j = 0; j < oneDay.length; j++){
+			curr = data.getValue(oneDay[j], col);
+			if (curr != null){
+			  averages[col] += curr;
+			  counter++;
+			}
+		 }
+
+			if (col == (data.getNumberOfColumns()-1)){
+				averages[col] = data.getValue(oneDay[0], col);		
+			}
+			else if (col != 0){ //todo: fix to be null not zero
+		  		averages[col] = Math.round(averages[col]/counter*10)/10;
+			}else{
+				averages[col] = null;
+		 	}
+		}
+
+		firstReading = start.clone();
+		reading = data.getValue(oneDay[0], 0);
+
+		if (Date.compare(firstReading, reading) == -1){
+	 		data.insertRows(oneDay[0], 1);
+	 		data.setValue(oneDay[0], 0, firstReading);
+			i++;
+		}
+
+		firstReading = end.clone();
+		reading = data.getValue(oneDay[oneDay.length-1], 0);
+		if (Date.compare(firstReading,  reading) == -1){
+	 		data.insertRows(oneDay[oneDay.length], 1);
+	 		data.setValue(oneDay[oneDay.length], 0, firstReading);
+			i++;
+		}
+
+		console.log(averages);
+		dataDaily.addRows([averages]);
+		i+= oneDay.length;		 
+	  }
+
+		 dataByHour = data.clone();
+		 data = dataDaily.clone();
+		 addExtraColumns(data);
+		 addExtraColumns(dataByHour);
+
+		 databyHourView = new google.visualization.DataView(dataByHour);
+		 databyHourView.setColumns([0,2,3,4]); 
+
+		 dataView = new google.visualization.DataView(data);
+		 dataView.setColumns([0,2,3,4]);   
+
+		var range = data.getColumnRange(2);
+	  //options for default state of histogram
+		 options = { strictFirstColumnType: true, animation: {duration: 1000, easing: 'in'}, 
+					chartArea : {width: 400, height: 215, top: 5, left: 10}, focusTarget : "category", 
+					hAxis: { format:'MM/dd/yy', viewWindowMode: 'explicit', gridlines: {color: "#dbdad5", count: 24}, 
+					viewWindow: {min: dataView.getValue(0, 0), max: dataView.getValue(data.getNumberOfRows() - 1, 0)}}, //initial date range = all
+					displayAnnotations: true, tooltip: {trigger: 'none'}, curve: "function",
+					backgroundColor: {fill: "white"},
+					vAxis: { gridlines: {count: 0}, viewWindowMode: 'explicit', viewWindow : {min: range.min - 1, max: range.max + 1}},
+					series: [{color: 'grey'}], pointSize: 0, lineWidth: 2}; 
+
+	  MAX = options.hAxis.viewWindow.max.clone();	 
+	  MIN = options.hAxis.viewWindow.min.clone();	  
+
+	  history = new google.visualization.LineChart(document.getElementById('visualization'));
+
+	  currData = data;
+	  currView = dataView;
+
+		google.visualization.events.addListener(history, 'select', function () {
+			   $("#visualization").find("iframe").contents().find("body").find('svg').click(testHandler);
+			   selectHandler();
+
+		});
+
+		var curr;
+		var counter = 0;
+		for(i=0; i < dataByHour.getNumberOfRows(); i++){
+			curr = dataByHour.getValue(i, 1);
+			if (curr != null){
+				stressAve += curr;
+				counter++;
+				curr = dataByHour.getValue(i, 2);
+				stressAveScaled += curr;
+			}
+		}
+
+		stressAve = Math.round(stressAve/counter);
+		stressAveScaled = Math.round(stressAveScaled/counter);
+
+
+		drawChart();
+ }
+
+	  function drawChart(){	  
+
+		prevButton.disabled = options.hAxis.viewWindow.min <= MIN;
+		nextButton.disabled = options.hAxis.viewWindow.max >= MAX; 
+		options.vAxis.viewWindow.min = currData.getColumnRange(2).min - 1;
+		addAnnotation();
+
+		switch(currentRange){
+		  case "Day":
+			history.draw(databyHourView, options);		 
+			currentRangeText.innerHTML = options.hAxis.viewWindow.min.toString(timeFormat);
+			break;
+		  default:
+			history.draw(dataView, options);
+			currentRangeText.innerHTML = options.hAxis.viewWindow.min.toString(timeFormat) + " - " + 
+			options.hAxis.viewWindow.max.toString(timeFormat);
+		}
+
+	  }
+
+	  function addAnnotation(){	 
+		  var column;
+		  var annot = currData.getFilteredRows([{column: 3,	 value: "Stress"}]);
+		  var rows = currData.getFilteredRows([{column: 0,	minValue: options.hAxis.viewWindow.min, maxValue: options.hAxis.viewWindow.max}]);
+		  var halfValue = rows[Math.round((rows.length-1)/2)];
+		  for (i=2; i< currData.getNumberOfColumns() -1;){
+			  column = currData.getColumnLabel(i);
+			  console.log(column);
+			  if (annot.length > 0){
+				currData.setValue(annot[0], i + 1, "");  
+			}
+			  console.log(currData.getColumnLabel(i+1));
+			  currData.setValue(halfValue, i + 1, column);  
+			  i += 4;
+		  }
+	  }
+
+	  function addExtraColumns(dataTab){
+		console.log("columns" + dataTab.getNumberOfColumns());
+		for (i=2; i< dataTab.getNumberOfColumns() - 1;){
+			dataTab.insertColumn(i+1, 'string', 'text');
+			dataTab.setColumnProperty(i+1, "role", "annotation");
+			dataTab.insertColumn(i+2, 'boolean', "certainty");
+			dataTab.setColumnProperty(i+2, "role", "certainty");
+
+		 	var empty = dataTab.getFilteredRows([{column: i, value: null}]);
+
+			var day; var val;
+		 	for (j=0; j< empty.length; j++){
+				day = dataTab.getValue(empty[j], 0);
+				if (Date.compare(day, day.clone().set({millisecond: 00, second: 00, minute: 00, hour: 00})) == 0){
+					val = dataTab.getValue(Math.min(dataTab.getNumberOfRows(),empty[j]+1), i);
+				}else{
+					val = dataTab.getValue(Math.max(0,empty[j]-1), i);
+				}
+
+				dataTab.setValue(empty[j], i, val);
+		   		dataTab.setValue(empty[j], i+2, false);
+		 	}			
+
+		  	//skip annotation and certainty column
+		  	i += 4;
+		}
+	  }
+
+	 /***** changeRange *****
+	  range= All/Month/Week/Day
+	  onClick function for range radio buttons
+	  changes date range of histogram and date text
+	  Note: all ranges end at current max date value
+	  *******/	   
+	  function changeRange(range){	 
+		$("#testOverlay").hide();
+		$("#contentPopUp").html("");		
+		var min = options.hAxis.viewWindow.max.clone();
+		var max = options.hAxis.viewWindow.max.clone();
+
+		switch(range){
+		  case currentRange:
+			break;
+		  case "All":
+			min = MIN;
+			max = MAX; 
+			break;
+		  case "Month":
+			min.addMonths(-1);
+			break;
+		  case "Week":
+			min.addWeeks(-1); 
+			break;
+		  case "Day":
+			options.hAxis.viewWindow.min = min.set({millisecond: 00, second: 00, minute: 00, hour: 00});
+			options.hAxis.viewWindow.max = max.set({millisecond: 59, second: 59, minute: 59, hour: 23});
+			setDayView();
+			break;
+		  default:
+		} 
+
+		options.hAxis.viewWindow.min = min; 
+		options.hAxis.viewWindow.max = max; 
+
+		var switched = (currentRange == "Day" && range != "Day") ? true : false;
+		currentRange = range;
+
+		if (switched){
+		  removeDayView();	
+		  assignColors();
+		}else if (currentRange == "Day"){
+			assignColors();
+		}
+
+		drawChart();
+
+		if ($('#highStress').prop("checked")){
+			options.chartArea.height = 245;
+			drawChart();
+			filterByStress($('#highStress').get(0));
+		}else if ($('#lowStress').prop("checked")){
+			options.chartArea.height = 245;
+			drawChart();
+			filterByStress($('#lowStress').get(0));
+		}
+
+	}
+
+	  function removeDayView(){
+		options.chartArea.height = 245;
+
+		$('#tempToggle').prop("disabled",false);
+		$('#sleepToggle').prop("disabled",false);
+		$('#tempToggle').prop("checked",false);
+		$('#sleepToggle').prop("checked",false);
+		$('#activityToggle').prop("checked",false);
+		$('#activityToggle').prop("disabled",false);
+
+		$('#highStress').prop("disabled",false);
+		$('#lowStress').prop("disabled",false);
+
+		cols = dataView.getViewColumns();
+
+	   for(var i=0; i< cols.length; i++) {
+		 if (cols[i] == 10) 
+		  $('#sleepToggle').prop("checked",true);
+		 if (cols[i] == 14) 
+		   $('#tempToggle').prop("checked",true);
+		 if (cols[i] == 18) 
+		   $('#activityToggle').prop("checked",true);
+		}
+
+		currData = data;
+		currView = dataView;
+		extraText.innerHTML = "";
+		options.hAxis.format = "MM/dd/yy";		
+
+	  }
+
+
+	  function setDayView(){
+		options.chartArea.height = 185;
+
+		options.vAxis.baseline = null;	
+		options.vAxis.baselineColor = "black";
+
+
+		//disable and check or simply .hide()?
+		$('#sleepToggle').prop("checked",true);
+		$('#sleepToggle').prop("disabled",true);
+		$('#tempToggle').prop("checked",true);
+		$('#tempToggle').prop("disabled",true);
+		$('#activityToggle').prop("checked",true);
+		$('#activityToggle').prop("disabled",true);
+
+		$('#highStress').prop("disabled",true);
+		$('#lowStress').prop("disabled",true);
+		$('#highStress').prop("checked",false);
+		$('#lowStress').prop("checked",false);
+
+		databyHourView.hideColumns([10,11,12,14,15,16,18,19,20]);
+		day = data.getFilteredRows([{column: 0, minValue: options.hAxis.viewWindow.min, maxValue: options.hAxis.viewWindow.max}]);
+
+		var text = "<ul>";
+		text += "<li><span>Average Sleep: " + data.getValue(day[0], colDir["Sleep"]) + " hours</span></li>";
+		text += "<li><span>Average Weather: " + data.getValue(day[0], colDir["Temperature"]) + unitDir["Temperature"] + " " +
+			data.getValue(day[0], data.getNumberOfColumns() - 1) + "</span></li>";
+		text += "<li><span>Average Activity: " + data.getValue(day[0], colDir["Activity"]) + unitDir["Activity"] +"</span></li>";
+		text += "</ul>";
+
+		extraText.innerHTML = "";
+		extraText.innerHTML = text;
+		options.hAxis.format = "ha";
+		currData = dataByHour;
+		currView = databyHourView;					
+	  }
+
+
+	 /***** changeDate *****
+	  dir: -1 for prev, 1 for next
+	  onClick function for prev and next buttons
+	  changes date range of histogram and date text
+	 *******/
+	 function changeDate(dir){
+		  $("#testOverlay").hide();
+		  $("#contentPopUp").html("");
+		var min = options.hAxis.viewWindow.min.clone();
+		var max = options.hAxis.viewWindow.max.clone();
+
+		switch(currentRange){
+		  case "Month":
+			min.addMonths(dir);
+			max.addMonths(dir);
+			break;
+		  case "Week":
+			min.addWeeks(dir);
+			max.addWeeks(dir);
+			break;
+		  case "Day":
+			min.addDays(dir);
+			max.addDays(dir);
+			break;
+		  default: 
+		} 
+
+		options.hAxis.viewWindow.min = min; 
+		options.hAxis.viewWindow.max = max; 
+		extraText.innerHTML = "";
+		drawChart();
+
+		if ($('#highStress').prop("checked")){
+			options.chartArea.height = 245;
+			drawChart();
+			filterByStress($('#highStress').get(0));
+		}else if ($('#lowStress').prop("checked")){
+			options.chartArea.height = 245;
+			drawChart();
+			filterByStress($('#lowStress').get(0));
+		}
+	  }
+
+	  function checkFactors(ele){
+		  $("#testOverlay").hide();
+			if (ele.checked){	
+			  dataView.setColumns(dataView.getViewColumns().concat([Number(ele.value),Number(ele.value)+1 , Number(ele.value)+2]));
+			  databyHourView.setColumns(databyHourView.getViewColumns().concat([Number(ele.value),Number(ele.value)+1 , Number(ele.value)+2]));
+			}else{
+			  dataView.hideColumns([Number(ele.value),Number(ele.value)+1 , Number(ele.value)+2]);
+			  databyHourView.hideColumns([Number(ele.value),Number(ele.value)+1 , Number(ele.value)+2]);
+			}	 
+
+			assignColors();
+
+			console.log(options.series);
+			drawChart();
+
+			if ($('#highStress').prop("checked")){
+				options.chartArea.height = 245;
+				drawChart();
+				filterByStress($('#highStress').get(0));
+			}else if ($('#lowStress').prop("checked")){
+				options.chartArea.height = 245;
+				drawChart();
+				filterByStress($('#lowStress').get(0));
+			}
+	  }
+
+	function assignColors(){
+		var filtered = false;
+		if ($('#highStress').prop("checked") || $('#lowStress').prop("checked")){
+			filtered = true;
+		}
+
+		options.series = {};
+		var label; var max = 0; 
+		var range;
+		var cols = currView.getViewColumns();
+		var counter = 0;
+		  for (i=1; i< cols.length; i+=3){
+			 range = currData.getColumnRange(cols[i]);
+			 if (filtered == false || i == 1)	
+			 	max = ((range.max + 1) > max) ? range.max + 1 : max;
+
+			 label = currData.getColumnLabel(cols[i]);
+			 console.log(label +  colorDir[label]);
+			if ((currentRange != "Day") || (currentRange == "Day" && label != "Sleep" && label != "Activity" && label != "Temperature")){
+				 options.series[counter] = {};
+				 options.series[counter]["color"] = colorDir[label];
+				 counter++;
+			}
+		  }
+
+		options.vAxis.viewWindow.max = max;
+	}
+
+	function filterByStress(ele){
+		extraText.innerHTML = "";
+		console.log("eleeee" + ele.id);
+		$("#testOverlay").hide();		
+		if (ele.checked){
+			var min;
+			var max;
+			switch(ele.id){
+		  		case 'highStress':
+					min = stressAve + 1;
+					max = 10;
+					$("#lowStress").prop("checked", false);
+					break;
+		  		case 'lowStress':
+					min = 0;
+					max = stressAve - 1;
+					$("#highStress").prop("checked", false);	
+					break;
+		  		default:
+			}
+
+
+		    var highRange = dataByHour.getFilteredRows([{column:0, minValue: options.hAxis.viewWindow.min, maxValue: options.hAxis.viewWindow.max},
+														{column: 1, minValue: stressAve + 1, maxValue: 10}]);
+
+		    var lowRange = dataByHour.getFilteredRows([{column:0, minValue: options.hAxis.viewWindow.min, maxValue: options.hAxis.viewWindow.max},
+												{column: 1, minValue: 0, maxValue: stressAve - 1}]);												
+			var highAverages = {};
+			var lowAverages = {};
+			var label;
+			var cols = [];
+
+			$('#formFactor input[type=checkbox]').each(function () {
+				 if (this.checked && $(this).val() != 2) {
+				         cols.push(Number($(this).val()));
+				}
+		    });
+
+			for (col = 0; col < cols.length; col++){				
+			  label = data.getColumnLabel(cols[col]);
+			  highAverages[label] = 0;
+			  lowAverages[label] = 0;
+			  lowCounter = 0;
+			  highCounter = 0;
+			  for (j = 0; j < highRange.length; j++){
+				curr = dataByHour.getValue(highRange[j], colDir[label]);
+				if (curr != null){
+				  highAverages[label] += curr;
+				  highCounter++;
+				}
+			  }
+
+			  for (j = 0; j < lowRange.length; j++){
+				curr = dataByHour.getValue(lowRange[j], colDir[label]);
+				if (curr != null){
+				  lowAverages[label] += curr;
+				  lowCounter++;
+				}
+			  }
+
+			  lowAverages[label] = Math.round(10*lowAverages[label]/lowCounter)/10;
+			  highAverages[label] = Math.round(10*highAverages[label]/highCounter)/10;
+
+			}
+
+			if ((options.chartArea.height != 185) && cols.length > 0){
+				options.chartArea.height -= 60;
+				options.vAxis.viewWindow.max = data.getColumnRange(2) + 1;
+				dataView.setColumns([0,2,3,4]);	
+				options.vAxis.baseline = stressAveScaled;	
+				options.vAxis.baselineColor = "green";
+				drawChart();
+
+			}
+
+
+
+			var selected= [];
+
+			//filter by date range being viewed and stress range selected
+			var inRange = data.getFilteredRows([{column:0, minValue: options.hAxis.viewWindow.min, maxValue: options.hAxis.viewWindow.max},
+													{column: 1, minValue: min, maxValue: max}]);
+
+			for(i=0; i<inRange.length; i++){
+			  selected.push({row: inRange[i], col: null});
+			}
+			for (i=0; i < selected.length; i++)
+			console.log( selected[i].row + "Selected");
+
+			history.setSelection(selected);
+
+	  		if (cols.length > 0){
+				var text = "<ul>";
+				for (var fact in highAverages){
+					if (ele.id == "highStress"){
+			  			text += "<li><span class='currRan'>Average " + fact + ":" + highAverages[fact] + unitDir[fact] +
+			 					" when your stress is higher than average</span><br/>";
+						text += "<span class='otherRan'>Average " + fact + ":" + lowAverages[fact] + unitDir[fact] +
+						 		" when your stress is lower than average</span></li>";
+					}else{
+				  		text += "<li><span class='currRan'>Average " + fact + ":" + lowAverages[fact] + unitDir[fact] + 
+								" when your stress is lower than average</span><br/>";
+						text += "<span class='otherRan'>Average " + fact + ":" + highAverages[fact] + unitDir[fact] + 
+								"when your stress is higher than average</span></li>";
+					}
+					extraText.innerHTML = text;
+				}
+				text += "</ul>";
+			}
+			}else{
+				if (options.chartArea.height != 245){
+					options.chartArea.height = 245;
+					$('#formFactor input[type=checkbox]').each(function () {
+					           if (this.checked && $(this).val() != 2) {
+					               checkFactors($(this).get(0));
+								}
+					});
+					options.vAxis.baseline = null;	
+					options.vAxis.baselineColor = "black";	
+
+					drawChart();
+				}else{
+					extraText.innerHTML = "";
+			    	history.setSelection();
+				}
+			}			
+	  }
+
+
+	  function convertToStressScale(dataTable, rowNum){
+		calcCounter < (dataTable.getNumberOfColumns()- 2) ? calcCounter++ : calcCounter = 1;
+
+		var range = dataTable.getColumnRange(calcCounter);
+		var currVal = dataTable.getValue(rowNum, calcCounter);
+		if (currVal == null)
+		  return null;
+		if ((range.max <= 10 && range.min >= 0)){ 
+				return currVal + 8*calcCounter;
+		}else{	
+		return (((10)*(currVal - range.min))/(range.max - range.min) + 8*calcCounter);
+		}
+	  }
+
+
+	  function testHandler(e){
+			$("#testOverlay").css("left", e.pageX - 51);
+			$("#testOverlay").css("top", e.pageY + 45);
+			$("#testOverlay").show();
+
+	}
+
+	  function selectHandler(e){	 
+		var ele = history.getSelection();
+		console.log("SAS:" + ele.length);
+		if (ele.length == 0){
+		  $("#testOverlay").unbind("click");
+		  $("#testOverlay").hide();
+		  $("#contentPopUp").html("");
+		}	
+
+		else{
+			  var label;
+			  var day = currData.getValue(ele[0].row, 0);
+			  day = (currentRange == "Day") ? day.toString("htt") : day.toString("MM/dd");
+			  var dayTxt = "<span>" + day + "</span>";
+			  var htmlText = "";
+			  var cols = currView.getViewColumns();
+			  console.log("col: " + cols);
+
+			  var isInput = false;
+			  for (i=1; i< cols.length; i+=3){
+				label = currData.getColumnLabel(cols[i]);
+				if (label != "text" && label != "certainty" && label !="Date"){
+					if (currData.getValue(ele[0].row, cols[i+2]) != false){
+						isInput = true;
+						value = currData.getValue(ele[0].row, colDir[label]);
+						if (i == 1){
+							var txt;
+							if (value > (stressAve + 1))
+								txt = "high";
+						    else if (value < (stressAve - 1))
+								txt = "low";
+							else
+								txt = "ave."
+							value = txt;
+						}
+						if (label == "Temperature"){
+							var weath = data.getValue(ele[0].row, data.getNumberOfColumns() - 1);
+							dayTxt = "<span>" + day + ": " + weath + "</span>";
+						}
+						htmlText += "<span>&#x2022 " + abvDir[label] + ": " + value + unitDir[label] + "</span><br/>";
+					}else{
+						htmlText += "<span>&#x2022 " + abvDir[label] + ":" + "No Input</span>";
+					}
+				}
+			}
+
+		    if (isInput == true){
+				$("#daySect").html(dayTxt);
+				$("#contentPopUp").html(htmlText);
+			  	$("#testOverlay").click(function(e){
+				selectPopUpHandler(e, currData.getValue(ele[0].row, 0));
+				});	
+			}else{
+			  $("#testOverlay").unbind("click");
+			  $("#testOverlay").hide();
+			  $("#contentPopUp").html("");
+			}
+		}
+		}
+
+	  function selectPopUpHandler(e, date){ 
+		switch(currentRange){
+			case "Day":
+				break;
+			default:
+				options.hAxis.viewWindow.max = date.clone();
+				$('#DayRad').prop('checked', true);
+				$("#contentPopUp").html("");
+				$("#testOverlay").unbind("click");
+				changeRange("Day");
+		}
+	   }
+
+	google.setOnLoadCallback(drawVisualization);
+
+
+
+
+	/********* TAKE READING BUTTON EVENT ************/
+	function takeReading(){
+		var rows = data.getNumberOfRows() - 1;
+		var txt = " ";
+		var rand; var label;
+		var newRow = [];
+
+		console.log(initData.getNumberOfColumns());
+		for (i = 1; i< initData.getNumberOfColumns(); i++){
+			rand = Math.floor((Math.random()*rows));
+			console.log("row" + rand);
+			label = initData.getColumnLabel(i);
+			txt += "<span>" + label + ": " + Math.round(data.getValue(rand, colDir[label])) + "</span><br />";
+			newRow[i] = rand;
+		}
+
+		console.log(txt);
+		$('#readFeedback').html(txt);
+	}
+	
+	
+	//for the toggling bars
+	
+	function changeSleep()
+{
+	if (sleepToggle.checked)
+	{
+	document.getElementById("sleep").style.backgroundImage = "url(sleep_on.png)";
+	}
+	else 
+	{
+	document.getElementById("sleep").style.backgroundImage = "url(sleep_off.png)";
+	}
+}
+
+	function changeActivity()
+{
+	if (activityToggle.checked)
+	{
+	document.getElementById("activity").style.backgroundImage = "url(activity_on.png)";
+	}
+	else 
+	{
+	document.getElementById("activity").style.backgroundImage = "url(activity_off.png)";
+	}
+}
+
+	function changeMood()
+{
+	if (moodToggle.checked)
+	{
+	document.getElementById("mood").style.backgroundImage = "url(mood_on.png)";
+	}
+	else 
+	{
+	document.getElementById("mood").style.backgroundImage = "url(mood_off.png)";
+	}
+}
+
+	function changeHeart()
+{
+	if (heartToggle.checked)
+	{
+	document.getElementById("heart").style.backgroundImage = "url(heart_on.png)";
+	}
+	else 
+	{
+	document.getElementById("heart").style.backgroundImage = "url(heart_off.png)";
+	}
+}
+
+
+	function changeWeather()
+{
+	if (tempToggle.checked)
+	{
+	document.getElementById("weather").style.backgroundImage = "url(weather_on.png)";
+	}
+	else 
+	{
+	document.getElementById("weather").style.backgroundImage = "url(weather_off.png)";
+	}
+	
+}
+
+
+
+	
+
+	</script>
+
+
+<style type="text/css">
+
+#testOverlay
+	{
+	  font-size: 12px;
+	  position: absolute;
+	}
+
+
+	#contentPopUp{
+		background: #eeeee7; /* Old browsers */
+		background: -moz-linear-gradient(top,  #eeeee7 1%, #e4e2dd 100%); /* FF3.6+ */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(1%,#eeeee7), color-stop(100%,#e4e2dd)); /* Chrome,Safari4+ */
+		background: -webkit-linear-gradient(top,  #eeeee7 1%,#e4e2dd 100%); /* Chrome10+,Safari5.1+ */
+		background: -o-linear-gradient(top,  #eeeee7 1%,#e4e2dd 100%); /* Opera 11.10+ */
+		background: -ms-linear-gradient(top,  #eeeee7 1%,#e4e2dd 100%); /* IE10+ */
+		background: linear-gradient(top,  #eeeee7 1%,#e4e2dd 100%); /* W3C */
+		padding-top: 4px;
+		border-right:1px solid rgb(189,189,185);
+		border-left:1px solid rgb(189,189,185);
+
+		margin-top: -3px;
+		width: 97%;
+		margin-left: 1px;
+	}
+
+	#contentPopUp span{
+		margin-left: 4px;
+		padding-bottom: 4px;
+		color: #393939;
+	}
+
+	#daySect span{
+		margin-left: 4px;
+		margin-bottom: 2px;
+	}
+
+	#dateLine{
+		height: 1px;
+		background-color: rgb(189,189,185);
+		margin-top: -1px;
+	}
+
+	#daySect{
+		background-color: #393939;
+		border-radius: 3px 3px 0 0;
+		border-top:1px solid rgb(189,189,185);
+		margin-left: 1px;
+		width: 99%;
+		color: white;
+		font-weight: bold;
+		padding: 3px 0px;
+		border-bottom: 1px solid #cfcb4e;		
+	}
+
+	#arrowPopUp{
+		position: absolute;
+		left: 100px;
+		top: 44%;
+	}
+
+
+	#sleep
+{
+	width:50px;
+	height:53px;
+	background-image:url('sleep_off.png');
+	background-repeat:no-repeat;
+	position:absolute;
+	left: -1px;
+	top: 14px;
+	z-index:10;
+	
+}
+
+	#activity
+{
+	width:50px;
+	height:53px;
+	background-image:url('activity_off.png');
+	background-repeat:no-repeat;
+	position:absolute;
+	left: -1px;
+	top: 56px;
+	z-index:10;
+}
+
+	#mood
+{
+	width:50px;
+	height:53px;
+	background-image:url('mood_off.png');
+	background-repeat:no-repeat;
+	position:absolute;
+	left: -2px;
+	top: 108px;
+	z-index:10;
+}
+
+	#heart
+{
+	width:50px;
+	height:53px;
+	background-image:url('heart_off.png');
+	background-repeat:no-repeat;
+	position:absolute;
+	left: -1px;
+	top: 162px;
+	z-index:10;
+}
+
+	#weather
+{
+	width:50px;
+	height:53px;
+	background-image:url('weather_off.png');
+	background-repeat:no-repeat;
+	position:absolute;
+	left: -1px;
+	top: 214px;
+	z-index:10;
+}
+
+
+#one
+{
+width:170px;
+height:800px;
+position:absolute;
+top:-20px;
+z-index:4;
+left:-20px;
+opacity:0;
+}
+
+#four
+{
+width:160px;
+height:160px;
+position:absolute;
+top:0px;
+left:959px;
+opacity:0;
+z-index:100;
+}
+
+#page_wrapper
+{
+width:100%;
+}
+
+
+.graph
+{
+	position:absolute;
+	z-index:10;
+	left:78px;
+	width:400px;
+	top:-26px;
+}
+
+.back
+{
+	position:absolute;
+	z-index:100;
+	top:0px;
+	left:0px;
+	width:82px;
+	height:33px;
+	opacity:0;
+}
+
+
+#five
+{
+	width:79px;
+	height:42px;
+	position:absolute;
+	top:0px;
+	left:397px;
+	opacity:0;
+	z-index:101;
+}
+
+
+}
+
+	  button:disabled{
+		display: none;
+	  }
+
+	  .stressTog:disabled, .stressTog{
+			display: inline;
+
+}
+
+	  input[type="radio"]{
+		display: inline; 
+	  }
+
+		#testOverlay{
+			-moz-border-radius: 5px;
+			border-radius: 5px;
+			position: absolute;
+			background-color: rgba(109,109,109,0.9);
+			padding: 5px;
+			color: white;
+			font-size: 12px;
+		}
+
+#visualization
+{
+width: 400px;
+height: 230px; 
+background-color:#dadada; 
+font-size:20px;
+}
+
+.outer
+{
+	overflow:hidden;
+	width:51px;
+	top:-11px;
+	height:310px;
+	position:absolute;
+	z-index:10;
+	left: 3px;
+}
+
+.inner
+{
+overflow:scroll; 
+width:68px; 
+top:55px; 
+height:325px;
+position:absolute;
+z-index:10;
+}
+
+
+.mainimg
+{
+width:480;
+position:absolute;
+left:0px;
+top:0px;
+}
+
+#tempToggle
+{
+width:90px;
+height:90px;
+}
+
+#sleepToggle
+{
+	width:47px;
+	height:54px;
+	position:absolute;
+	left:-2px;
+	top:10px;
+	opacity:0;
+	z-index:99;
+}
+
+#activityToggle
+{
+	width:39px;
+	height:38px;
+	position:absolute;
+	left:-2px;
+	top:64px;
+	opacity:0;
+	z-index:99;
+}
+
+
+#moodToggle
+{
+	width:44px;
+	height:40px;
+	position:absolute;
+	left:-4px;
+	top:110px;
+	opacity:0;
+	z-index:99;
+}
+
+.heartToggle
+{
+	width:45px;
+	height:43px;
+	position:absolute;
+	left:-4px;
+	top:162px;
+	opacity:0;
+	z-index:99;
+}
+
+
+#tempToggle
+{
+	width:46px;
+	height:39px;
+	position:absolute;
+	left:-3px;
+	top:216px;
+	opacity:0;
+	z-index:99;
+}
+
+#highStress
+{
+	width:41px;
+	height:40px;
+	position:absolute;
+	opacity:0;
+	left: -1px;
+	top: 274px;
+		z-index:99;
+}
+
+#lowStress
+{
+	width:41px;
+	height:44px;
+	position:absolute;
+	left:0px;
+	top:330px;
+	opacity:0;
+		z-index:99;
+}
+
+#currentRange
+{
+position:absolute;
+top:0px;
+left:22%;
+font-family:arial;
+font-size:13px;
+font-weight:bold;
+text-transform:uppercase;
+color:#105658;
+width:450px;
+}
+
+#datechanger
+{
+	position:absolute;
+	z-index:99;
+	top:261px;
+	left:150px;
+	width:254px;
+	height:41px;
+}
+
+#AllRad
+{
+	z-index:40;
+	position:absolute;
+	top:-13px;
+	left:182px;
+	width:47px;
+	height:45px;
+	opacity:0;
+}
+
+#MonthRad
+{
+	z-index:40;
+	position:absolute;
+	top:-10px;
+	left:121px;
+	width:50px;
+	height:41px;
+	opacity:0;
+}
+
+#WeekRad
+{
+	z-index:40;
+	position:absolute;
+	top:-8px;
+	left:67px;
+	width:43px;
+	height:41px;
+	opacity:0;
+}
+
+
+#DayRad
+{
+	z-index:40;
+	position:absolute;
+	top:-6px;
+	left:13px;
+	width:41px;
+	height:38px;
+	opacity:0;
+}
+
+.wrapper
+{
+position:relative;
+margin-left:auto;
+margin-right:auto;
+width:500px;
+}
+
+.sidebar
+{
+width:45px;
+}
+
+.datechangerimg
+{
+width:95%;
+}
+
+
+
+
+    </style>
+
+</head>
+
+<div class="page_wrapper">
+
+<div class="wrapper">
+
+<a href="wireframe7.html"><button class="back"></button>
+</a>
+
+<a href="wireframe8.html">
+<button type="button" id="five">Click Me!</button>
+</a>
+
+
+
+<div><img src="vitalclip_menu_offstatewbg.png" class="mainimg"></div>
+
+
+<div class="outer">
+   <div class="inner">
+      <img src="vitalclip_sidebar.png" class="sidebar">
+      
+      <div id="sleep"></div>
+      <div id="activity"></div>
+      <div id="mood"></div>
+      <div id="heart"></div>
+      <div id="weather"></div>
+      <div id="hstress"></div>
+      <div id="lstress"></div>
+      
+	<input type="checkbox" name="sleepToggle" id="sleepToggle" value="10" onclick='checkFactors(this); changeSleep();'>
+	</input>
+	<input type="checkbox" name="activityToggle" id="activityToggle" value="18" onClick='checkFactors(this); changeActivity();'>
+	</input>
+	<input type="checkbox" name="moodToggle" id="moodToggle" value="22" onClick='checkFactors(this); changeMood();'>
+	</input>
+	<input type="checkbox" name="heartToggle" class="heartToggle" id="heart" value="6" onClick='checkFactors(this); changeHeart();'>
+	</input>
+	<input type="checkbox"	name="tempToggle" id="tempToggle" value="14" onClick='checkFactors(this); changeWeather();'>
+	</input>
+	<input type="checkbox" name="highStress" id="highStress" class= "stressTog "onClick="filterByStress(this)" >
+	</input>
+	<input type="checkbox" name="lowStress" id="lowStress" class= "stressTog" onClick="filterByStress(this)"></input>
+    <br>
+    <br><br>
+<br>
+   </div>
+</div>
+
+
+<div id="datechanger">
+<img src="graphdatechanger.png" class="datechangerimg"></img>
+<input type="radio" name="range" id="AllRad" value="All" checked="checked" onClick="changeRange(this.value)">
+</input>
+	  <input type="radio" name="range" id="MonthRad" value="Month" onClick="changeRange(this.value)">
+</input>
+	  <input type="radio" name="range" id="WeekRad" value="Week" onClick="changeRange(this.value)">
+</input>
+	  <input type="radio" name="range" id="DayRad" value="Day" onClick="changeRange(this.value)">
+    </input>
+</div>
+
+
+<div class="graph">
+	<button type="button" id="prevDate" onClick="changeDate(-1)" ></button>
+	<span id="currentRange"></span>
+	<button type="button" id="nextDate" onClick="changeDate(1)"></button>
+	<br/><br/>
+	<form id="formFactor">
+	</form><br/>
+	<div id="visualization"></div>
+	<div id="testOverlay" style="display: none">
+		<div id="daySect"></div>
+		<div id="contentPopUp"></div>
+		<img id="arrowPopUp" src="img/arrow.png"/>	
+		<img id="botPopUp" src="img/popup_box_slice_03.png"/>	
+	</div>
+	<div id="extraText"></div>
+</div>
+
+</div>
+</div>
+
+</html>

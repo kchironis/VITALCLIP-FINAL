@@ -1,0 +1,151 @@
+<style type="text/css">
+
+img
+{
+width:320px;
+}
+
+#one
+{
+	width:246px;
+	height:56px;
+	position:absolute;
+	top:343px;
+	left:36px;
+	opacity:0;
+}
+
+#two
+{
+	position:absolute;
+	top:141px;
+	left:54px;
+	width:180px;
+	height:30px;
+	font-size:12px;
+	border:0px solid;
+}
+
+#three
+{
+	position:absolute;
+	top:183px;
+	left:54px;
+	width:180px;
+	height:30px;
+	font-size:12px;
+	border:0px solid;
+}
+
+#four
+{
+	position:absolute;
+	top:241px;
+	left:126px;
+	width:145px;
+	height:30px;
+	font-size:12px;
+	border:0px solid;
+}
+
+#five
+{
+	position:absolute;
+	top:291px;
+	left:53px;
+	width:98px;
+	height:31px;
+	font-size:12px;
+	border:0px solid;
+}
+
+#six
+{
+	position:absolute;
+	top:292px;
+	left:171px;
+	width:95px;
+	height:28px;
+	font-size:12px;
+	border:0px solid;
+}
+
+
+.wrapper
+{
+position:relative;
+width:320px;
+margin-left:auto;
+margin-right:auto;
+}
+
+.iphone
+{
+	position:absolute;
+	z-index:150;
+	left: 337px;
+	top: 123px;
+}
+
+#maleholder
+{
+	width:45px;
+	height:46px;
+	background-image:url('04_aboutyou_male.png');
+	background-repeat:no-repeat;
+	position:absolute;
+	left: 68px;
+	top: 236px;
+}
+
+#femaleholder
+{
+	width:38px;
+	height:49px;
+	background-image:url('04_aboutyou_female.png');
+	background-repeat:no-repeat;
+	position:absolute;
+	left: 29px;
+	top: 236px;
+}
+
+</style>
+
+<script type="text/javascript">
+
+function changeMale()
+{
+
+	document.getElementById("maleholder").style.backgroundImage = "url(04_aboutyou_male_pushed.png)";
+	document.getElementById("femaleholder").style.backgroundImage = "url(04_aboutyou_female.png)";
+}
+
+function changeFemale()
+{
+
+	document.getElementById("maleholder").style.backgroundImage = "url(04_aboutyou_male.png)";
+	document.getElementById("femaleholder").style.backgroundImage = "url(04_aboutyou_female_pushed.png)";
+}
+</script>
+<div class="wrapper">
+<img src="04_vitalclip_aboutyou.png">
+
+<a href="wireframe3_2.html">
+<button type="button" id="one">Click Me!</button>
+</a>
+
+
+<input type="text" id="two" placeholder="First Name" />
+
+<input type="text" id="three" placeholder="Last Name" />
+
+<input type="text" id="four" placeholder="Birthday (mm/dd/yy)" />
+
+<input type="text" id="five" placeholder="Weight" />
+
+<input type="text" id="six" placeholder="Height" />
+
+<div id="maleholder" onclick="changeMale()"></div>
+<div id="femaleholder" onclick="changeFemale()"></div>
+
+</div>
