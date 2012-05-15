@@ -85,6 +85,8 @@ function updateOrientation(){
 	  var abvDir = {"Stress" : "Stress", "Heart Rate" : "  HR", "Sleep" : "Sleep", "Temperature" : "Temp", "Activity" : "Act", "Mood" : "Mood"};
 	  var imgDir = {"Stress" : "Stress", "Heart Rate" : "img/heart_icon.png", "Sleep" : "img/sleep_icon.png",
 	 				"Temperature" : "img/weather_icon.png", "Activity" : "img/activity_icon.png", "Mood" : "img/mood_icon.png"};
+	  var weathDir = {"Snowing" : "img/icons/snowflake.png", "Cloudy" : "img/icons/cloud.png",
+	 				"Raining" : "img/icons/rain.png", "Sunny" : "img/icons/sun.png"};
 
 
 
@@ -385,6 +387,8 @@ function updateOrientation(){
 		$('#extraText').css("height", "83px");
 		$('#extraText').css("margin-top", "0px");
 		$('#extraText').hide();
+		$('#arrowIcon').show();
+		
 
 		$('#tempToggle').prop("disabled",false);
 		$('#sleepToggle').prop("disabled",false);
@@ -416,13 +420,15 @@ function updateOrientation(){
 
 
 	  function setDayView(){
-		options.chartArea.height = 185;
+		options.chartArea.height = 145;
 
 		options.vAxis.baseline = null;	
 		options.vAxis.baselineColor = "black";
 		$('#extraText').css("height", "59px");
 		$('#extraText').css("margin-top", "25px");
 		$('#extraText').show();
+		$('#arrowIcon').hide();
+		
 
 
 		//disable and check or simply .hide()?
@@ -569,7 +575,6 @@ function updateOrientation(){
 	function filterByStress(ele){
 		extraText.innerHTML = "";
 		var strRange = "";
-		console.log("eleeee" + ele.id);
 		$("#testOverlay").hide();		
 		if (ele.checked){
 			var min;
@@ -634,8 +639,8 @@ function updateOrientation(){
 
 			}
 
-			if ((options.chartArea.height != 185) && cols.length > 0){
-				options.chartArea.height -= 60;
+			if ((options.chartArea.height == MAXHEIGHT) && cols.length > 0){
+				options.chartArea.height = 133;
 				options.vAxis.viewWindow.max = data.getColumnRange(2) + 1;
 				dataView.setColumns([0,2,3,4]);	
 				options.vAxis.baseline = stressAveScaled;	
@@ -762,7 +767,7 @@ function updateOrientation(){
 						}
 						if (label == "Temperature"){
 							var weath = data.getValue(ele[0].row, data.getNumberOfColumns() - 1);
-							dayTxt = "<span>" + day + ": " + weath + "</span>";
+							dayTxt = "<span>" + day 	 + "</span><img id='weathIcon' src='" + weathDir[weath] + "'/>" ;
 						}
 						htmlText += "<span>&#x2022 " + abvDir[label] + ": " + value + unitDir[label] + "</span><br/>";
 					}else{
@@ -893,6 +898,14 @@ function updateOrientation(){
 <style type="text/css">
 body{
 	
+}
+
+#weathIcon{
+	width:15px;
+	height:17px;
+	float: right;
+	margin-right: 10px;
+	margin-top: -1px;
 }
 #testOverlay
 	{
@@ -1097,9 +1110,9 @@ width:100%;
 
 #visualization
 {
-margin-top: 17px;
+margin-top: 19px;
 width: 406px;
-height: 237px; 
+height: 236px; 
 background-color:#dadada; 
 font-size:20px;
 }
@@ -1333,8 +1346,8 @@ width:45px;
 #extraText{
 	background: url("img/vitalclip_day_static.png") repeat-y;
 	position: absolute;
-	top: 170px;
-	height: 83px;
+	top: 181	px;
+	height: 81px;
 	border-bottom: 1px solid rgb(189,189,189);
 	border-top: 1px solid rgb(189,189,189);
 	width: 100%;	
@@ -1342,7 +1355,7 @@ width:45px;
 
 #extraText ul{
 	margin-top: 0px;
-	padding: 5px 10px;
+	padding: 2px 10px;
 }
 
 #extraText ul li{
@@ -1352,7 +1365,7 @@ width:45px;
 	padding-left: 4px;
 	border-right: 1px solid rgb(189,189,189);
 	height: 50px;
-	margin-top: 10px;
+	margin-top: 5px;
 	min-width:120px;
 }
 
@@ -1361,7 +1374,7 @@ width:45px;
 }
 
 #filterIntro{
-	font-size: 14px;
+	font-size: 12px;
 	font-weight: bold;
 }
 
