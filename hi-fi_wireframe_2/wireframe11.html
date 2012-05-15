@@ -79,6 +79,7 @@ function updateOrientation(){
 	  var initData;
 	  var stressAve = 0;
 	  var stressAveScaled = 0;
+	  var MAXHEIGHT = 207;
 
 	  /***hard coded column values and units***/
 	  var colDir = {"Stress" : 1, "Heart Rate" : 5, "Sleep" : 9, "Temperature" : 13, "Activity" : 17, "Mood" : 21};
@@ -211,7 +212,7 @@ function updateOrientation(){
 		var range = data.getColumnRange(2);
 	  //options for default state of histogram
 		 options = { strictFirstColumnType: true, animation: {duration: 1000, easing: 'in'}, 
-					chartArea : {width: 400, height: 215, top: 5, left: 10}, focusTarget : "category", 
+					chartArea : {width: 400, height: 207, top: 5, left: 10}, focusTarget : "category", 
 					hAxis: { format:'MM/dd/yy', viewWindowMode: 'explicit', gridlines: {color: "#dbdad5", count: 24}, 
 					viewWindow: {min: dataView.getValue(0, 0), max: dataView.getValue(data.getNumberOfRows() - 1, 0)}}, //initial date range = all
 					displayAnnotations: true, tooltip: {trigger: 'none'}, curve: "function",
@@ -368,11 +369,11 @@ function updateOrientation(){
 		drawChart();
 
 		if ($('#highStress').prop("checked")){
-			options.chartArea.height = 245;
+			options.chartArea.height = MAXHEIGHT;
 			drawChart();
 			filterByStress($('#highStress').get(0));
 		}else if ($('#lowStress').prop("checked")){
-			options.chartArea.height = 245;
+			options.chartArea.height = MAXHEIGHT;
 			drawChart();
 			filterByStress($('#lowStress').get(0));
 		}
@@ -380,7 +381,7 @@ function updateOrientation(){
 	}
 
 	  function removeDayView(){
-		options.chartArea.height = 245;
+		options.chartArea.height = MAXHEIGHT;
 
 		$('#tempToggle').prop("disabled",false);
 		$('#sleepToggle').prop("disabled",false);
@@ -482,11 +483,11 @@ function updateOrientation(){
 		drawChart();
 
 		if ($('#highStress').prop("checked")){
-			options.chartArea.height = 245;
+			options.chartArea.height = MAXHEIGHT;
 			drawChart();
 			filterByStress($('#highStress').get(0));
 		}else if ($('#lowStress').prop("checked")){
-			options.chartArea.height = 245;
+			options.chartArea.height = MAXHEIGHT;
 			drawChart();
 			filterByStress($('#lowStress').get(0));
 		}
@@ -508,11 +509,11 @@ function updateOrientation(){
 			drawChart();
 
 			if ($('#highStress').prop("checked")){
-				options.chartArea.height = 245;
+				options.chartArea.height = MAXHEIGHT;
 				drawChart();
 				filterByStress($('#highStress').get(0));
 			}else if ($('#lowStress').prop("checked")){
-				options.chartArea.height = 245;
+				options.chartArea.height = MAXHEIGHT;
 				drawChart();
 				filterByStress($('#lowStress').get(0));
 			}
@@ -656,8 +657,8 @@ function updateOrientation(){
 				text += "</ul>";
 			}
 			}else{
-				if (options.chartArea.height != 245){
-					options.chartArea.height = 245;
+				if (options.chartArea.height != MAXHEIGHT){
+					options.chartArea.height = MAXHEIGHT;
 					$('#formFactor input[type=checkbox]').each(function () {
 					           if (this.checked && $(this).val() != 2) {
 					               checkFactors($(this).get(0));
@@ -691,10 +692,9 @@ function updateOrientation(){
 
 
 	  function testHandler(e){
-			$("#testOverlay").css("left", e.pageX - 51);
-			$("#testOverlay").css("top", e.pageY + 45);
+			$("#testOverlay").css("left", e.pageX - 57);
+			$("#testOverlay").css("top", e.pageY - 57);
 			$("#testOverlay").show();
-
 	}
 
 	  function selectHandler(e){	 
@@ -859,12 +859,7 @@ function updateOrientation(){
 	}
 	
 }
-
-
-
-	
-
-	</script>
+</script>
 
 
 <style type="text/css">
@@ -942,8 +937,7 @@ function updateOrientation(){
 	
 }
 
-	#activity
-{
+#activity{
 	width:50px;
 	height:53px;
 	background-image:url('activity_off.png');
@@ -954,7 +948,7 @@ function updateOrientation(){
 	z-index:10;
 }
 
-	#mood
+#mood
 {
 	width:50px;
 	height:53px;
@@ -1023,9 +1017,10 @@ width:100%;
 {
 	position:absolute;
 	z-index:10;
-	left:78px;
-	width:400px;
-	top:-26px;
+	left:73px;
+	width:406px;
+	top:44px;
+	background-color: white;
 }
 
 .back
@@ -1070,8 +1065,9 @@ width:100%;
 
 #visualization
 {
-width: 400px;
-height: 230px; 
+margin-top: 17px;
+width: 406px;
+height: 240px; 
 background-color:#dadada; 
 font-size:20px;
 }
@@ -1188,30 +1184,61 @@ height:90px;
 	left:0px;
 	top:330px;
 	opacity:0;
-		z-index:99;
+	z-index:99;
 }
 
 #currentRange
 {
 position:absolute;
-top:0px;
-left:22%;
+top:7px;
+left:20%;
+text-align: center;
 font-family:arial;
 font-size:13px;
 font-weight:bold;
 text-transform:uppercase;
-color:#105658;
-width:450px;
+color:#393939;
+width: 200px;
+z-index: 1;
+}
+
+#prevDate{
+	cursor: pointer;
+	position:absolute;
+	top:6px;
+	left:18%;
+	background: url("img/arrow_back.png") no-repeat;
+	border: none;
+	z-index: 1;
+}
+
+#nextDate{
+	cursor: pointer;
+	position:absolute;
+	top:6px;
+	left:68%;
+	background: url("img/arrow_next.png") no-repeat;
+	border: none;
+	z-index: 1;
+}
+
+#prevDate:disabled, #nextDate:disabled{
+	display: none;
 }
 
 #datechanger
 {
 	position:absolute;
 	z-index:99;
-	top:261px;
-	left:150px;
+	top:5px;
+	left:130px;
 	width:254px;
 	height:41px;
+}
+
+.datechangerimg
+{
+width:95%;
 }
 
 #AllRad
@@ -1272,15 +1299,7 @@ width:500px;
 width:45px;
 }
 
-.datechangerimg
-{
-width:95%;
-}
-
-
-
-
-    </style>
+</style>
 
 </head>
 
@@ -1349,15 +1368,15 @@ width:95%;
 	<button type="button" id="prevDate" onClick="changeDate(-1)" ></button>
 	<span id="currentRange"></span>
 	<button type="button" id="nextDate" onClick="changeDate(1)"></button>
-	<br/><br/>
+	<!-- <br/><br/>
 	<form id="formFactor">
-	</form><br/>
+	</form><br/> -->
 	<div id="visualization"></div>
 	<div id="testOverlay" style="display: none">
 		<div id="daySect"></div>
 		<div id="contentPopUp"></div>
 		<img id="arrowPopUp" src="img/arrow.png"/>	
-		<img id="botPopUp" src="img/popup_box_slice_03.png"/>	
+		<img id="botPopUp" src="img/popup_box_slice_03.png"/>		
 	</div>
 	<div id="extraText"></div>
 </div>
